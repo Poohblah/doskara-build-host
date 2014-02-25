@@ -1,0 +1,27 @@
+#!/bin/sh
+
+APP_NAME=hello-doskara
+appdir=/tmp/"$APP_NAME"
+mkdir -p "$appdir"
+dockerfile="$appdir"/Dockerfile
+builddir="$appdir"/build
+mkdir "$builddir"
+
+# checkout git repo
+export GIT_WORK_TREE="$builddir" 
+git checkout -f
+
+# build docker container
+# create dockerfile
+echo "
+FROM ubuntu:latest
+ENV DEBIAN_FRONTEND noninteractive
+RUN apt-get update -y
+ADD ./build /$APP_NAME
+WORKDIR /$APP_NAME
+RUN /bin/bash build.sh
+EXPOSE 80
+ENTRYPOINT /bin/bash run.sh
+" > "$dockerfile"
+
+docker build -t doskara/"$APP_NAME" "$appdir"
